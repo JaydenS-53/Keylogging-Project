@@ -7,6 +7,7 @@ enc_key = Fernet.generate_key()
 cipher = Fernet(enc_key)
 
 
+# function to encrypt the keystrokes using the fernet key
 def encrypt_keystrokes(key):
     # Check if the key is a printable character
     if hasattr(key, 'char'):
@@ -19,11 +20,13 @@ def encrypt_keystrokes(key):
         print("Keystroke = " + encrypted_keystroke.decode(), end='\n', flush=True)
 
 
+# when a key is pressed, run the encryption algorithm
 def on_press(key):
     # Encrypt the keystroke
     encrypt_keystrokes(key)
 
 
+# when the key is released, stop the listener
 def on_release(key):
     # Stop the listener when the Escape key is pressed
     if key == keyboard.Key.esc:
