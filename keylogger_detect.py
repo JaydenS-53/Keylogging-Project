@@ -10,14 +10,14 @@ def get_whitelist():
     return whitelist
 
 
-def is_uncommon_exe(process_name, whitelist):
-    return process_name.endswith(".exe") and process_name not in whitelist
+def is_uncommon_exe(process_id, whitelist):
+    return process_id.endswith(".exe") and process_id not in whitelist
 
 
-def get_process_by_name(process_name):
-    for proc in psutil.process_iter(['pid', 'name']):
-        if proc.info['name'] == process_name:
-            return proc
+def get_process_by_name(process_id):
+    for value in psutil.process_iter(['pid', 'name']):
+        if value.info['name'] == process_id:
+            return value
 
 
 def kill_process(process):
@@ -31,14 +31,13 @@ def kill_process(process):
 
 
 if __name__ == "__main__":
-    whitelist = get_whitelist()
-
+    list_of_processes = get_whitelist()
     print("Scanning for uncommon .exe files running on your machine...")
 
     uncommon_processes = []
     for proc in psutil.process_iter(['pid', 'name']):
         process_name = proc.info['name']
-        if is_uncommon_exe(process_name, whitelist):
+        if is_uncommon_exe(process_name, list_of_processes):
             uncommon_processes.append(process_name)
 
     if uncommon_processes:

