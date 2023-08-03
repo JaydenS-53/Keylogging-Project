@@ -5,7 +5,7 @@ def get_whitelist():
     whitelist = []
     with open("exe_files.txt", "r") as file:
         for line in file:
-            # Remove leading/trailing whitespaces and add the line to the whitelist
+            # Remove leading or trailing whitespaces and add the line to the whitelist
             whitelist.append(line.strip())
     return whitelist
 
