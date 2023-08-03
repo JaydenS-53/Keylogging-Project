@@ -26,7 +26,7 @@ def on_press(key):
     encrypt_keystrokes(key)
 
 
-# when the key is released, stop the listener
+# when the key is released stop the listener
 def on_release(key):
     # Stop the listener when the Escape key is pressed
     if key == keyboard.Key.esc:
